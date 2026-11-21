@@ -185,6 +185,37 @@ export const tabStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
+    alignSelf: "center",
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+  },
+  infoIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: "#0F172A",
+    fontWeight: "600",
   },
   logoutButton: {
     flexDirection: "row",

@@ -1,11 +1,42 @@
+import { getAuthSession, UserData } from "@/services/authService";
 import { homeStyles } from "@/styles/homeStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const { email } = useLocalSearchParams<{ email?: string }>();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadUserData = async () => {
+    try {
+      const session = await getAuthSession();
+      if (session) {
+        setUser(session.user);
+      } else {
+        // Jika tidak ada session, redirect ke login
+        router.replace("/login");
+      }
+    } catch {
+      router.replace("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadUserData();
+  }, []);
 
   const handleMenuPress = (menuName: string, targetRoute?: string) => {
     if (targetRoute) {
@@ -18,6 +49,21 @@ export default function HomeScreen() {
     }
   };
 
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#F8FAFC",
+        }}
+      >
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={homeStyles.safeArea} edges={[]}>
       <ScrollView
@@ -29,14 +75,14 @@ export default function HomeScreen() {
         <View style={homeStyles.welcomeCard}>
           <View style={homeStyles.statusBadge}>
             <Ionicons name="checkmark-circle" size={15} color="#059669" />
-            <Text style={homeStyles.statusBadgeText}>
-              Berhasil Masuk (UI Mode)
-            </Text>
+            <Text style={homeStyles.statusBadgeText}>Login Berhasil</Text>
           </View>
 
-          <Text style={homeStyles.greetingTitle}>Halo, Selamat Datang!</Text>
+          <Text style={homeStyles.greetingTitle}>
+            Halo, {user?.name || "Pengguna"}!
+          </Text>
           <Text style={homeStyles.greetingEmail}>
-            {email || "mahasiswa@kampus.ac.id"}
+            {user?.email || "user@example.com"}
           </Text>
         </View>
 

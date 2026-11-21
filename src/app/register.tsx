@@ -1,34 +1,39 @@
+import { registerApi, saveAuthSession } from "@/services/authService";
 import { authStyles } from "@/styles/authStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  Keyboard,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [noHp, setNoHp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
+  const [noHpFocused, setNoHpFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     // Validasi sederhana
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !noHp || !password || !confirmPassword) {
       Alert.alert("Error", "Semua field harus diisi!");
       return;
     }
@@ -51,15 +56,29 @@ export default function RegisterScreen() {
       return;
     }
 
-    // Register berhasil (UI Mode - tanpa backend)
-    Alert.alert("Registrasi Berhasil", `Akun ${email} berhasil dibuat!`, [
-      {
-        text: "OK",
-        onPress: () => {
-          router.replace("/login");
-        },
-      },
-    ]);
+    setLoading(true);
+    Keyboard.dismiss();
+
+    try {
+      // Panggil API Register Laravel dengan 5 field
+      const response = await registerApi({
+        name,
+        email,
+        no_hp: noHp,
+        password,
+        password_confirmation: confirmPassword,
+      });
+
+      // Simpan token & user ke AsyncStorage
+      await saveAuthSession(response.user, response.token);
+
+      // Redirect ke Home
+      router.replace("/home");
+    } catch (error: any) {
+      Alert.alert("Registrasi Gagal", error.message || "Terjadi kesalahan.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -137,6 +156,35 @@ export default function RegisterScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            {/* No HP Input */}
+            <View style={authStyles.inputGroup}>
+              <Text style={authStyles.label}>Nomor HP</Text>
+              <View
+                style={[
+                  authStyles.inputWrapper,
+                  noHpFocused && authStyles.inputWrapperFocused,
+                ]}
+              >
+                <Ionicons
+                  name="call-outline"
+                  size={20}
+                  color={noHpFocused ? "#2563EB" : "#94A3B8"}
+                  style={authStyles.inputIcon}
+                />
+                <TextInput
+                  style={authStyles.input}
+                  placeholder="08xxxxxxxxxx"
+                  placeholderTextColor="#94A3B8"
+                  value={noHp}
+                  onChangeText={setNoHp}
+                  onFocus={() => setNoHpFocused(true)}
+                  onBlur={() => setNoHpFocused(false)}
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
                 />
               </View>
             </View>
@@ -225,11 +273,19 @@ export default function RegisterScreen() {
 
             {/* Register Button */}
             <TouchableOpacity
-              style={authStyles.button}
+              style={[
+                authStyles.button,
+                loading && authStyles.primaryButtonDisabled,
+              ]}
               onPress={handleRegister}
               activeOpacity={0.8}
+              disabled={loading}
             >
-              <Text style={authStyles.buttonText}>Daftar Sekarang →</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={authStyles.buttonText}>Daftar Sekarang →</Text>
+              )}
             </TouchableOpacity>
           </View>
 
