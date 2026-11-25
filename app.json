@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "tugas1mobile2",
-    "slug": "tugas1mobile2",
+    "name": "2310001_DenilJuniaEkaPutra",
+    "slug": "2310001_DenilJuniaEkaPutra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tugas1mobile2",
+    "scheme": "2310001_DenilJuniaEkaPutra",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
